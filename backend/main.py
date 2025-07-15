@@ -5,6 +5,7 @@ from db import connect_to_db, close_db_connection
 from queryhandler import router as query_router
 from cart import router as cart_router
 from auth import router as auth_router
+from speech_recognition_handler import router as speech_router
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -39,6 +40,7 @@ async def shutdown():
 app.include_router(auth_router)
 app.include_router(query_router)
 app.include_router(cart_router)
+app.include_router(speech_router)
 
 # Root endpoint
 @app.get("/")
