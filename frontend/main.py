@@ -132,7 +132,21 @@ def get_headers():
     return {}
 
 st.sidebar.title("SmartShop Assistant")
-page = st.sidebar.radio("Select", ["Search", "Login", "Signup", "Cart"])
+
+# Check if user is logged in
+if not st.session_state.access_token:
+    # If not logged in, only show Login and Signup options
+    page = st.sidebar.radio("Select", ["Login", "Signup"])
+else:
+    # If logged in, show all options
+    page = st.sidebar.radio("Select", ["Search", "Cart"])
+    # Show logged in user and logout button
+    st.sidebar.success(f"Logged in as: {st.session_state.username}")
+    if st.sidebar.button("Logout"):
+        st.session_state.access_token = None
+        st.session_state.username = None
+        st.session_state.cart_items = []
+        st.rerun()
 
 if page == "Login":
     st.header("Login")
@@ -334,8 +348,14 @@ elif page == "Cart":
                             if st.button("🗑️ Remove", key=remove_key):
                                 try:
                                     with st.spinner("Removing item..."):
-                                        remove_url = f"{BACKEND_URL}/remove_from_cart/{st.session_state.username}/{item['product']}"
-                                        remove_response = requests.delete(remove_url)
+                                        # Use query parameters instead of path parameters
+                                        remove_response = requests.delete(
+                                            f"{BACKEND_URL}/remove_from_cart",
+                                            params={
+                                                "username": st.session_state.username,
+                                                "product": item['product']
+                                            }
+                                        )
                                     
                                     if remove_response.status_code == 200:
                                         st.success("✅ Item removed!")
@@ -373,11 +393,3 @@ elif page == "Cart":
     except Exception as e:
         st.error("❌ Something went wrong. Please try again.")
         logger.error(f"Error loading cart: {str(e)}")
-
-# Logout button in sidebar if logged in
-if st.session_state.username:
-    st.sidebar.markdown("---")
-    if st.sidebar.button("Logout"):
-        st.session_state.access_token = None
-        st.session_state.username = None
-        st.rerun()

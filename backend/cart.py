@@ -93,11 +93,12 @@ async def get_cart(username: str):
         logger.error(f"Error getting cart: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
-@router.delete("/remove_from_cart/{username}/{product}")
+@router.delete("/remove_from_cart")
 async def remove_from_cart(username: str, product: str):
     """Remove item from user's cart"""
     try:
         logger.debug(f"Removing item from cart for user: {username}")
+        logger.debug(f"Product to remove: {product}")
         
         # Get database instance
         db = await get_database()
